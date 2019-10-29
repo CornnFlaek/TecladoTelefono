@@ -29,7 +29,7 @@ namespace GraficadorSeñales
 
         private void BtnGraficar_Click(object sender, RoutedEventArgs e)
         {
-            
+
             double tiempoInicial =
                 double.Parse(txtTiempoInicial.Text);
             double tiempoFinal =
@@ -42,7 +42,7 @@ namespace GraficadorSeñales
             Señal segundaSeñal = null;
             Señal señalResultante;
 
-            switch(cbTipoSeñal.SelectedIndex)
+            switch (cbTipoSeñal.SelectedIndex)
             {
                 case 0: // Parabolica
                     señal = new SeñalParabolica();
@@ -62,9 +62,9 @@ namespace GraficadorSeñales
                             ((ConfiguracionSeñalSenoidal)
                             (panelConfiguracion.Children[0])).txtFrecuencia.Text
                             );
-                    señal = 
+                    señal =
                         new SeñalSenoidal(amplitud, fase, frecuencia);
-                    
+
                     break;
                 case 2:
                     string rutaArchivo =
@@ -83,7 +83,7 @@ namespace GraficadorSeñales
                     break;
             }
 
-            if (cbTipoSeñal.SelectedIndex != 2 
+            if (cbTipoSeñal.SelectedIndex != 2
                 && señal != null)
             {
                 señal.TiempoInicial =
@@ -97,7 +97,7 @@ namespace GraficadorSeñales
             }
 
             //Construir segunda señal si es necesario
-            if(cbOperacion.SelectedIndex == 2)
+            if (cbOperacion.SelectedIndex == 2)
             {
                 switch (cbTipoSeñal_2.SelectedIndex)
                 {
@@ -139,7 +139,7 @@ namespace GraficadorSeñales
                         segundaSeñal = null;
                         break;
                 }
-                if (cbTipoSeñal_2.SelectedIndex != 2 && 
+                if (cbTipoSeñal_2.SelectedIndex != 2 &&
                     segundaSeñal != null)
                 {
                     segundaSeñal.TiempoInicial = tiempoInicial;
@@ -150,8 +150,8 @@ namespace GraficadorSeñales
                 }
             }
 
-            
-            switch(cbOperacion.SelectedIndex)
+
+            switch (cbOperacion.SelectedIndex)
             {
                 case 0: //Escala de amplitud
                     double factorEscala =
@@ -202,24 +202,24 @@ namespace GraficadorSeñales
             double amplitudMaxima =
                 (señal.AmplitudMaxima >= señalResultante.AmplitudMaxima) ?
                 señal.AmplitudMaxima : señalResultante.AmplitudMaxima;
-           
+
             if (segundaSeñal != null)
             {
                 //Elige entre la mas grande de la 1ra y resultante y la segunda
                 amplitudMaxima = (amplitudMaxima > segundaSeñal.AmplitudMaxima) ?
                     amplitudMaxima : segundaSeñal.AmplitudMaxima;
             }
-            
 
 
-            
+
+
 
 
             plnGrafica.Points.Clear();
             plnGraficaResultante.Points.Clear();
             plnGrafica_2.Points.Clear();
 
-            if(segundaSeñal != null)
+            if (segundaSeñal != null)
             {
                 foreach (var muestra in segundaSeñal.Muestras)
                 {
@@ -228,7 +228,7 @@ namespace GraficadorSeñales
                         muestra.Y, tiempoInicial, amplitudMaxima));
                 }
             }
-            
+
 
             foreach (Muestra muestra in señal.Muestras)
             {
@@ -237,11 +237,11 @@ namespace GraficadorSeñales
                     muestra.Y, tiempoInicial, amplitudMaxima)
                     );
             }
-            foreach(Muestra muestra in señalResultante.Muestras)
+            foreach (Muestra muestra in señalResultante.Muestras)
             {
                 plnGraficaResultante.Points.Add(
                     adaptarCoordenadas(muestra.X,
-                    muestra.Y,tiempoInicial, amplitudMaxima)
+                    muestra.Y, tiempoInicial, amplitudMaxima)
                     );
             }
 
@@ -251,27 +251,93 @@ namespace GraficadorSeñales
                 int indiceMaximo2 = 0;
                 for (int i = 0; i < señalResultante.Muestras.Count / 2; i++)
                 {
-                    if (señalResultante.Muestras[i].Y > 1150 && señalResultante.Muestras[i].Y < 1550)
+                    if (señalResultante.Muestras[i].X > señalResultante.TiempoFinal / 8 && señalResultante.Muestras[i].X < señalResultante.TiempoFinal / 2)
                     {
-                        if (señalResultante.Muestras[i].Y >
-                            señalResultante.Muestras[indiceMaximo].Y)
+                        if (señalResultante.Muestras[i].Y > señalResultante.Muestras[indiceMaximo].Y)
                         {
                             indiceMaximo = i;
                         }
                     }
-                    if (señalResultante.Muestras[i].Y > 650 && señalResultante.Muestras[i].Y < 1000)
+                    if (señalResultante.Muestras[i].X < señalResultante.TiempoFinal / 8)
                     {
-                        if (señalResultante.Muestras[i].Y >
-                            señalResultante.Muestras[indiceMaximo2].Y)
+                        if (señalResultante.Muestras[i].Y > señalResultante.Muestras[indiceMaximo2].Y)
                         {
                             indiceMaximo2 = i;
                         }
                     }
                 }
-                double frecuencia =
-                    (double)(indiceMaximo * señalResultante.FrecuenciaMuestreo)
-                    / (double)señalResultante.Muestras.Count;
+                double frecuencia = (double)(indiceMaximo * señalResultante.FrecuenciaMuestreo) / (double)señalResultante.Muestras.Count;
+                double frecuencia_2 = (double)(indiceMaximo2 * señalResultante.FrecuenciaMuestreo) / (double)señalResultante.Muestras.Count;
                 lblHertz.Text = frecuencia.ToString("N") + " Hz";
+                lblHertz_2.Text = frecuencia_2.ToString("N") + " Hz";
+
+                string numero = "#";
+
+                if (frecuencia_2 > 670 && frecuencia_2 < 720)
+                {
+                    if (frecuencia > 1150 && frecuencia < 1250)
+                    {
+                        numero = "1";
+                    }
+                    if (frecuencia > 1250 && frecuencia < 1400)
+                    {
+                        numero = "2";
+                    }
+                    if (frecuencia > 1400)
+                    {
+                        numero = "3";
+                    }
+                }
+
+                if (frecuencia_2 > 720 && frecuencia_2 < 810)
+                {
+                    if (frecuencia > 1150 && frecuencia < 1250)
+                    {
+                        numero = "4";
+                    }
+                    if (frecuencia > 1250 && frecuencia < 1400)
+                    {
+                        numero = "5";
+                    }
+                    if (frecuencia > 1400)
+                    {
+                        numero = "6";
+                    }
+                }
+
+                if (frecuencia_2 > 810 && frecuencia_2 < 950)
+                {
+                    if (frecuencia > 1150 && frecuencia < 1250)
+                    {
+                        numero = "7";
+                    }
+                    if (frecuencia > 1250 && frecuencia < 1400)
+                    {
+                        numero = "8";
+                    }
+                    if (frecuencia > 1400)
+                    {
+                        numero = "9";
+                    }
+                }
+
+                if (frecuencia_2 > 900)
+                {
+                    if (frecuencia > 1150 && frecuencia < 1250)
+                    {
+                        numero = "*";
+                    }
+                    if (frecuencia > 1250 && frecuencia < 1400)
+                    {
+                        numero = "0";
+                    }
+                    if (frecuencia > 1400)
+                    {
+                        numero = "#";
+                    }
+                }
+
+                lblNumero.Text = numero.ToString();
 
             }
 
@@ -310,10 +376,10 @@ namespace GraficadorSeñales
             plnEjeY.Points.Clear();
             plnEjeY.Points.Add(
                 adaptarCoordenadas(0.0, amplitudMaxima,
-                tiempoInicial,amplitudMaxima));
+                tiempoInicial, amplitudMaxima));
             plnEjeY.Points.Add(
                 adaptarCoordenadas(0.0, -amplitudMaxima,
-                tiempoInicial, amplitudMaxima)) ;
+                tiempoInicial, amplitudMaxima));
             //Resultado
             plnEjeYResultante.Points.Clear();
             plnEjeYResultante.Points.Add(
@@ -334,14 +400,14 @@ namespace GraficadorSeñales
         {
             return new Point((x - tiempoInicial) * scrGrafica.Width,
                 (-1 * (
-                y * ((( scrGrafica.Height  / 2.0  ) -25 ) / amplitudMaxima) )) +
-                (scrGrafica.Height / 2.0) );
+                y * (((scrGrafica.Height / 2.0) - 25) / amplitudMaxima))) +
+                (scrGrafica.Height / 2.0));
         }
 
         private void CbTipoSeñal_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             panelConfiguracion.Children.Clear();
-            switch(cbTipoSeñal.SelectedIndex)
+            switch (cbTipoSeñal.SelectedIndex)
             {
                 case 0: //Parabolica
                     break;
@@ -352,7 +418,7 @@ namespace GraficadorSeñales
                 case 2:
                     panelConfiguracion.Children.Add(
                         new ConfiguracionAudio()
-                        ) ;
+                        );
                     break;
                 default:
                     break;
@@ -363,7 +429,7 @@ namespace GraficadorSeñales
         {
             panelConfiguracionOperacion.Children.Clear();
             mostrarSegundaSeñal(false);
-            switch(cbOperacion.SelectedIndex)
+            switch (cbOperacion.SelectedIndex)
             {
                 case 0: //Escala de amplitud
                     panelConfiguracionOperacion.
@@ -420,7 +486,8 @@ namespace GraficadorSeñales
                     Visibility.Visible;
                 panelConfiguracion_2.Visibility =
                     Visibility.Visible;
-            } else
+            }
+            else
             {
                 lblTipoSeñal_2.Visibility =
                     Visibility.Hidden;
